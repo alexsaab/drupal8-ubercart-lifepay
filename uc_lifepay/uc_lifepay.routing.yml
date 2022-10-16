@@ -1,0 +1,7 @@
+uc_lifepay.notification:
+  path: '/cart/lifepay/notification'
+  defaults:
+    _controller: '\Drupal\uc_lifepay\Controller\LifepayController::notification'
+    _title: 'Notification callback'
+  requirements:
+    _permission: 'access content'

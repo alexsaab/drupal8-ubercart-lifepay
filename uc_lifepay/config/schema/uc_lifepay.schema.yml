@@ -1,0 +1,23 @@
+# Schema for the configuration files of the uc_lifepay module.
+payment_method.settings.lifepay:
+  type: mapping
+  label: 'lifepay form configuration settings'
+  mapping:
+    x_login:
+      type: string
+      label: 'Merchant ID'
+    secret:
+      type: string
+      label: 'Secret Key'
+    back_url:
+      type: string
+      label: 'Back ref url. (http://{your_site}/lifepay/back_url)'
+    currency:
+      type: string
+      label: 'Type of currency. Leave empty to shop currency'
+    language:
+      type: string
+      label: 'Payment Language'
+    autocapture:
+      type: boolean
+      label: 'Autocapture'
