@@ -250,7 +250,7 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
     }
 
     /**
-     * Generate payment form 
+     * Generate payment form
      * {@inheritdoc}
      */
     public function buildRedirectForm(array $form, FormStateInterface $form_state, OrderInterface $order = null)
@@ -343,31 +343,6 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
         return $itemsArray;
     }
 
-
-    /**
-     * Check LIFE PAY IPN validity
-     * @param $posted
-     * @return bool
-     */
-    private function checkIpnRequestIsValid($posted): bool
-    {
-        $url = \Drupal::request()->getHost() . $_SERVER['REQUEST_URI'];
-        $check = $posted['check'];
-        unset($posted['check']);
-
-        if ($this->configuration['api_version'] === '2.0') {
-            $signature = $this->getSign2("POST", $url, $posted, $this->configuration['skey']);
-        } elseif ($this->configuration['api_version'] === '1.0') {
-            $signature = $this->getSign1($posted, $this->configuration['skey']);
-        }
-
-        if ($signature === $check) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     /**
      * Part of sign generator
      * @param $queryData
@@ -430,20 +405,6 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
         return $signature;
     }
 
-    /**
-     * Add sign number two version
-     * @param $posted
-     * @param $key
-     * @return string
-     */
-    private function getSign1($posted, $key): string
-    {
-        return rawurlencode(md5($posted['tid'] . $posted['name'] . $posted['comment'] . $posted['partner_id'] .
-            $posted['service_id'] . $posted['order_id'] . $posted['type'] . $posted['cost'] . $posted['income_total'] .
-            $posted['income'] . $posted['partner_income'] . $posted['system_income'] . $posted['command'] .
-            $posted['phone_number'] . $posted['email'] . $posted['resultStr'] .
-            $posted['date_created'] . $posted['version'] . $key));
-    }
 
     /**
      * Generate payment form
