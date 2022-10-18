@@ -128,38 +128,4 @@ class LifepayController extends ControllerBase {
     $response->send();
   }
 
-  /**
-   * Return sign with MD5 algoritm
-   *
-   * @param $x_login
-   * @param $x_trans_id
-   * @param $x_amount
-   * @param $secret
-   * @return string
-   */
-  public static function get_x_MD5_Hash($x_login, $x_trans_id, $x_amount, $secret)
-  {
-    return md5($secret . $x_login . $x_trans_id . $x_amount);
-  }
-
-  /**
-   * Check if IP adress in server lists
-   *
-   * @return bool
-   */
-  public function checkInServerList()
-  {
-    if ($this->configuration['use_ip_only_from_server_list']) {
-      $clientIp = \Drupal::request()->getClientIp();
-      $serverIpList = preg_split('/\r\n|[\r\n]/', $this->configuration['server_list']);
-      if (in_array($clientIp, $serverIpList)) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return true;
-    }
-  }
-
 }

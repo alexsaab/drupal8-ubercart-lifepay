@@ -3,21 +3,45 @@ payment_method.settings.lifepay:
   type: mapping
   label: 'lifepay form configuration settings'
   mapping:
-    x_login:
+    service_id:
       type: string
-      label: 'Merchant ID'
-    secret:
+      label: 'Service ID'
+    key:
       type: string
-      label: 'Secret Key'
-    back_url:
+      label: 'Service key'
+    skey:
       type: string
-      label: 'Back ref url. (http://{your_site}/lifepay/back_url)'
-    currency:
+      label: 'Secret key'
+    shop_hostname:
       type: string
-      label: 'Type of currency. Leave empty to shop currency'
-    language:
+      label: 'Order description with host name'
+    api_version:
       type: string
-      label: 'Payment Language'
-    autocapture:
+      label: 'API version'
+    payment_method:
+      type: string
+      label: 'Payment method'
+    vat_products:
+      type: string
+      label: 'VAT for products'
+    vat_delivery:
+      type: string
+      label: 'VAT for delivery'
+    unit_products:
+      type: string
+      label: 'Units for products'
+    unit_delivery:
+      type: string
+      label: 'Units for delivery'
+    object_products:
+      type: string
+      label: 'Object for products'
+    object_delivery:
+      type: string
+      label: 'Object for delivery'
+    send_email:
       type: boolean
-      label: 'Autocapture'
+      label: 'Attach email in order'
+    order_status_after_pay:
+      type: string
+      label: 'Order status after successfully payment'

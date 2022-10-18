@@ -26,7 +26,7 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
     /**
      * @var string payment url
      */
-    protected $url = 'https://lifepay.com/ru/pay/AuthorizeNet';
+    protected $url = 'https://partner.life-pay.ru/alba/input/';
     /**
      * @var string
      */
@@ -66,24 +66,24 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
     {
 
         $returned = [
-                'x_login' => '',
-                'secret' => '',
-                'description' => 'Оплата заказа №',
-                'vat_shipping' => 'N',
-                'use_ip_only_from_server_list' => true,
-                'server_list' => '95.213.209.218
-95.213.209.219
-95.213.209.220
-95.213.209.221
-95.213.209.222',
-                'order_status_after' => 'processing'
+                'service_id' => '',
+                'key' => '',
+                'skey' => '',
+                'shop_hostname' => 'Store www...., order #',
+                'api_version' => '1.0',
+                'payment_method' => 'full_prepayment',
+                'vat_products' => 'none',
+                'vat_delivery' => 'none',
+                'unit_products' => 'piece',
+                'unit_delivery' => 'service',
+                'object_products' => 'commodity',
+                'object_delivery' => 'service',
+                'send_email' => true,
+                'order_status_after_pay' => 'processing'
             ] + parent::defaultConfiguration();
 
-        foreach (uc_product_types() as $type) {
-            $returned['vat_product_' . $type] = 'N';
-        }
-
         return $returned;
+
     }
 
     /**
@@ -94,80 +94,126 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
      */
     public function buildConfigurationForm(array $form, FormStateInterface $form_state)
     {
-        $form['x_login'] = [
+        $form['service_id'] = [
             '#type' => 'textfield',
-            '#title' => $this->t('Your Merchant ID'),
-            '#description' => $this->t('Your mid from portal.'),
-            '#default_value' => $this->configuration['x_login'],
-            '#size' => 40,
-        ];
-
-        $form['secret'] = [
-            '#type' => 'textfield',
-            '#title' => $this->t('Secret word for order verification'),
-            '#description' => $this->t('The secret word entered in your lifepay settings page.'),
-            '#default_value' => $this->configuration['secret'],
-            '#size' => 40,
-        ];
-
-        $form['description'] = [
-            '#type' => 'textfield',
-            '#title' => $this->t("Order description"),
-            '#description' => $this->t("Order description in Lifepay interface"),
-            '#default_value' => $this->configuration['description'],
+            '#title' => $this->t("Service ID"),
+            '#description' => $this->t("Visit merchant interface in Lifepay site https://home.life-pay.ru/alba/index/ and copy Service ID field"),
+            '#default_value' => $this->configuration['service_id'],
             '#required' => true,
         ];
 
+        $form['key'] = [
+            '#type' => 'textfield',
+            '#title' => $this->t("Service key"),
+            '#description' => $this->t("Input service key here"),
+            '#default_value' => $this->configuration['key'],
+            '#required' => true,
+        ];
 
-        foreach (uc_product_types() as $type) {
-            $form['vat_product_' . $type] = [
-                '#type' => 'select',
-                '#title' => $this->t("Vat rate for product type " . $type),
-                '#description' => $this->t("Set vat rate for product " . $type),
-                '#options' => [
-                    'Y' => $this->t('With VAT'),
-                    'N' => $this->t('WIthout VAT'),
-                ],
-                '#default_value' => $this->configuration['vat_product_' . $type],
-                '#required' => true,
-            ];
-        }
+        $form['skey'] = [
+            '#type' => 'textfield',
+            '#title' => $this->t("Service key"),
+            '#description' => $this->t("Input secret key here"),
+            '#default_value' => $this->configuration['skey'],
+            '#required' => true,
+        ];
 
-        $form['vat_shipping'] = [
+        $form['shop_hostname'] = [
+            '#type' => 'textfield',
+            '#title' => $this->t("Hostname and order description"),
+            '#description' => $this->t("Order description with host name"),
+            '#default_value' => $this->configuration['shop_hostname'],
+            '#required' => false,
+        ];
+
+        $form['api_version'] = [
             '#type' => 'select',
-            '#title' => $this->t("Vat rate for shipping"),
-            '#description' => $this->t("Set vat rate for shipping"),
-            '#options' => [
-                'Y' => $this->t('With VAT'),
-                'N' => $this->t('WIthout VAT'),
-            ],
-            '#default_value' => $this->configuration['vat_shipping'],
+            '#title' => $this->t("API version"),
+            '#description' => $this->t("See you API version in partner (merchant) interface"),
+            '#options' => self::getApiVersionOptions(),
+            '#default_value' => $this->configuration['api_version'],
             '#required' => true,
         ];
 
-        $form['use_ip_only_from_server_list'] = [
+        $form['payment_method'] = [
+            '#type' => 'select',
+            '#title' => $this->t("Payment method"),
+            '#description' => $this->t("Select payment method usually full_prepayment"),
+            '#options' => self::getPaymentMethodOptions(),
+            '#default_value' => $this->configuration['payment_method'],
+            '#required' => true,
+        ];
+
+        $form['vat_products'] = [
+            '#type' => 'select',
+            '#title' => $this->t("VAT for products"),
+            '#description' => $this->t("Select VAT for products"),
+            '#options' => self::getVatOptions(),
+            '#default_value' => $this->configuration['vat_products'],
+            '#required' => true,
+        ];
+
+        $form['vat_delivery'] = [
+            '#type' => 'select',
+            '#title' => $this->t("VAT for delivery"),
+            '#description' => $this->t("Select VAT for delivery"),
+            '#options' => self::getVatOptions(),
+            '#default_value' => $this->configuration['vat_delivery'],
+            '#required' => true,
+        ];
+
+        $form['unit_products'] = [
+            '#type' => 'select',
+            '#title' => $this->t("Object for products"),
+            '#description' => $this->t("Select units for products"),
+            '#options' => self::getVatOptions(),
+            '#default_value' => $this->configuration['unit_products'],
+            '#required' => true,
+        ];
+
+        $form['unit_delivery'] = [
+            '#type' => 'select',
+            '#title' => $this->t("Units for delivery"),
+            '#description' => $this->t("Select units for delivery"),
+            '#options' => self::getVatOptions(),
+            '#default_value' => $this->configuration['unit_delivery'],
+            '#required' => true,
+        ];
+
+        $form['object_products'] = [
+            '#type' => 'select',
+            '#title' => $this->t("Object for products"),
+            '#description' => $this->t("Select objects for products"),
+            '#options' => self::getPaymentObjectOptions(),
+            '#default_value' => $this->configuration['object_products'],
+            '#required' => true,
+        ];
+
+        $form['object_delivery'] = [
+            '#type' => 'select',
+            '#title' => $this->t("Object for delivery"),
+            '#description' => $this->t("Select objects for delivery"),
+            '#options' => self::getPaymentObjectOptions(),
+            '#default_value' => $this->configuration['object_delivery'],
+            '#required' => true,
+        ];
+
+        $form['send_email'] = [
             '#type' => 'checkbox',
-            '#title' => $this->t("Use server IP"),
-            '#description' => $this->t("Use server IP for callback only from list"),
+            '#title' => $this->t("Attach email in order"),
+            '#description' => $this->t("Attach email in order or not"),
             '#value' => true,
             '#false_values' => [false],
-            '#default_value' => $this->configuration['use_ip_only_from_server_list'],
-            '#required' => true,
+            '#default_value' => $this->configuration['send_email'],
+            '#required' => false,
         ];
 
-        $form['server_list'] = [
-            '#type' => 'textarea',
-            '#title' => $this->t("Acceptable server list"),
-            '#description' => $this->t("Input new server IP in each new string"),
-            '#default_value' => $this->configuration['server_list'],
-        ];
-
-        $form['order_status_after'] = [
+        $form['order_status_after_pay'] = [
             '#type' => 'select',
-            '#title' => $this->t("Order status after successfull payment"),
-            '#description' => $this->t("Set order status after successfull payment"),
+            '#title' => $this->t("Order status after successfully payment"),
+            '#description' => $this->t("Set order status after successfully payment"),
             '#options' => OrderStatus::getOptionsList(),
-            '#default_value' => $this->configuration['order_status_after'],
+            '#default_value' => $this->configuration['order_status_after_pay'],
             '#required' => true,
         ];
 
@@ -181,19 +227,30 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
      */
     public function submitConfigurationForm(array &$form, FormStateInterface $form_state)
     {
-        $this->configuration['x_login'] = $form_state->getValue('x_login');
-        $this->configuration['secret'] = $form_state->getValue('secret');
-        foreach (uc_product_types() as $type) {
-            $this->configuration['vat_product_' . $type] = $form_state->getValue('vat_product_' . $type);
+        // Parent method will reset configuration array and further condition will
+        // fail.
+        parent::submitConfigurationForm($form, $form_state);
+        if (!$form_state->getErrors()) {
+            $values = $form_state->getValue($form['#parents']);
+            $this->configuration['service_id'] = $values['service_id'];
+            $this->configuration['key'] = $values['key'];
+            $this->configuration['skey'] = $values['skey'];
+            $this->configuration['shop_hostname'] = $values['shop_hostname'];
+            $this->configuration['api_version'] = $values['api_version'];
+            $this->configuration['payment_method'] = $values['payment_method'];
+            $this->configuration['vat_products'] = $values['vat_products'];
+            $this->configuration['vat_delivery'] = $values['vat_delivery'];
+            $this->configuration['unit_products'] = $values['unit_products'];
+            $this->configuration['unit_delivery'] = $values['unit_delivery'];
+            $this->configuration['object_products'] = $values['object_products'];
+            $this->configuration['object_delivery'] = $values['object_delivery'];
+            $this->configuration['send_email'] = $values['send_email'];
+            $this->configuration['order_status_after_pay'] = $values['order_status_after_pay'];
         }
-        $this->configuration['vat_shipping'] = $form_state->getValue('vat_shipping');
-        $this->configuration['use_ip_only_from_server_list'] = $form_state->getValue('use_ip_only_from_server_list');
-        $this->configuration['server_list'] = $form_state->getValue('server_list');
-        $this->configuration['order_status_after'] = $form_state->getValue('order_status_after');
     }
 
     /**
-     *
+     * Generate payment form 
      * {@inheritdoc}
      */
     public function buildRedirectForm(array $form, FormStateInterface $form_state, OrderInterface $order = null)
@@ -201,93 +258,191 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
         // Get config
         $configs = $this->configuration;
 
-        // Posotion count in order
-        $pos = 1;
-        // line item list
-        $x_line_item = '';
-
         // Get amount
-        $x_amount = uc_currency_format($order->getTotal(), false, false, '.');
+        $totalPriceNumber = uc_currency_format($order->getTotal(), false, false, '.');
 
-        // Get now for sign
-        $now = time();
-
-        // Set data array
-        $data = [
-            'x_description' => $configs['description'] . $order->id(),
-            'x_login' => $configs['x_login'],
-            'x_amount' => $x_amount,
-            'x_currency_code' => $order->getCurrency(),
-            'x_fp_sequence' => $order->id(),
-            'x_fp_timestamp' => $now,
-            'x_fp_hash' => self::get_x_fp_hash($configs['x_login'], $order->id(), $now, $x_amount,
-                $order->getCurrency(), $configs['secret']),
-            'x_invoice_num' => $order->id(),
-            'x_relay_response' => "TRUE",
-            'x_relay_url' => Url::fromRoute('uc_lifepay.notification', [], ['absolute' => true])->toString(),
-        ];
-
-        // Get customer (order) email
+        // Get Email
         $customerEmail = $order->getEmail();
-        // if isset email
-        if ($customerEmail) {
-            $data['x_email'] = $customerEmail;
+
+        // Get order ID
+        $orderId = $order->id();
+
+        $items = [];
+        $items['items'] = self::getOrderItems($order, $configs);
+
+        $data = array(
+            'key' => $configs['key'],
+            'cost' => $totalPriceNumber,
+            'order_id' => $orderId,
+            'name' =>  $configs['shop_hostname'] . $orderId,
+            'invoice_data' => json_encode($items),
+        );
+
+        if ($configs['send_email']) {
+            $data['email'] = $customerEmail;
         }
 
-
-        foreach ($order->products as $product) {
-            $lineArr = array();
-            $lineArr[] = '№' . $pos . " ";
-
-
-            $nid = $product->nid->first()->getValue()['target_id'];
-            $node = Node::load($nid);
-            $type = $node->getType();
-
-            $lineArr[] = substr($product->model->value, 0, 30);
-            $lineArr[] = substr($product->title->value, 0, 254);
-            $lineArr[] = $product->qty->value;
-            $lineArr[] = uc_currency_format($product->price->value, FALSE, FALSE, '.');
-            $lineArr[] = $configs['vat_product_' . $type];
-            $x_line_item .= implode('<|>', $lineArr) . "0<|>\n";
-            $pos++;
+        if ($configs['api_version'] === '2.0') {
+            unset($data['key']);
+            $data['version'] = $configs['api_version'];
+            $data['service_id'] = $configs['service_id'];
+            $data['check'] = $this->getSign2('POST', $this->liveurl, $data, $configs['skey']);
         }
-
-        // add delivery
-        foreach ($order->getLineItems() as $item) {
-            if ($item['type'] == 'shipping') {
-                $lineArr = array();
-                $lineArr[] = '№' . $pos . " ";
-                $lineArr[] = 'shipping';
-                $lineArr[] = substr($item['title'], 0, 254);
-                $lineArr[] = '1';
-                $lineArr[] = uc_currency_format($item['amount'], FALSE, FALSE, '.');
-                $lineArr[] = $configs['vat_shipping'];
-                $x_line_item .= implode('<|>', $lineArr) . "0<|>\n";
-            }
-        }
-
-        $data['x_line_item'] = $x_line_item;
 
         return $this->generateForm($data, $this->url);
     }
 
+
     /**
-     * Get sign for send order
-     * @param $x_login
-     * @param $x_fp_sequence
-     * @param $x_fp_timestamp
-     * @param $x_amount
-     * @param $x_currency_code
-     * @param $secret
+     * Get order items
+     * @param $order
+     * @param array $config
+     * @return array
+     */
+    public static function getOrderItems($order, array $config): array
+    {
+        $itemsArray = [];
+
+        // Products lines
+        foreach ($order->products as $product) {
+
+            $price = (float)uc_currency_format($product->price->value, false, false, '.');
+            $qty = (int)  $product->qty->value;
+            $total = $price * $qty;
+            $itemsArray[] = [
+                'code' => $product->model->value,
+                'name' => $product->title->value,
+                'price' => $price,
+                'unit' => $config['unit_products'],
+                'payment_object' => $config['object_products'],
+                'payment_method' => $config['payment_method'],
+                'quantity' => $qty,
+                'sum' => $total,
+                'vat_mode' => $config['vat_products'],
+            ];
+        }
+
+        // Shipping lines
+        foreach ($order->getLineItems() as $item) {
+            $price = uc_currency_format($item['amount'], false, false, '.');
+            if ($item['type'] == 'shipping') {
+                $itemsArray[] = [
+                    'code' => 'shipping',
+                    'name' => $item['title'],
+                    'price' => $price,
+                    'unit' => $config['unit_delivery'],
+                    'payment_object' => $config['object_delivery'],
+                    'payment_method' => $config['payment_method'],
+                    'quantity' => 1,
+                    'sum' => $price,
+                    'vat_mode' => $config['vat_delivery'],
+                ];
+            }
+        }
+
+        return $itemsArray;
+    }
+
+
+    /**
+     * Check LIFE PAY IPN validity
+     * @param $posted
+     * @return bool
+     */
+    private function checkIpnRequestIsValid($posted): bool
+    {
+        $url = \Drupal::request()->getHost() . $_SERVER['REQUEST_URI'];
+        $check = $posted['check'];
+        unset($posted['check']);
+
+        if ($this->configuration['api_version'] === '2.0') {
+            $signature = $this->getSign2("POST", $url, $posted, $this->configuration['skey']);
+        } elseif ($this->configuration['api_version'] === '1.0') {
+            $signature = $this->getSign1($posted, $this->configuration['skey']);
+        }
+
+        if ($signature === $check) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Part of sign generator
+     * @param $queryData
+     * @param string $argSeparator
      * @return string
      */
-    public static function get_x_fp_hash($x_login, $x_fp_sequence, $x_fp_timestamp,
-        $x_amount, $x_currency_code, $secret)
+    private function httpBuildQueryRfc3986($queryData, string $argSeparator = '&'): string
     {
-        $arr = [$x_login, $x_fp_sequence, $x_fp_timestamp, $x_amount, $x_currency_code];
-        $str = implode('^', $arr);
-        return hash_hmac('md5', $str, $secret);
+        $r = '';
+        $queryData = (array)$queryData;
+        if (!empty($queryData)) {
+            foreach ($queryData as $k => $queryVar) {
+                $r .= $argSeparator . $k . '=' . rawurlencode($queryVar);
+            }
+        }
+        return trim($r, $argSeparator);
+    }
+
+    /**
+     * Sign generator
+     * @param $method
+     * @param $url
+     * @param $params
+     * @param $secretKey
+     * @param false $skipPort
+     * @return string
+     */
+    private function getSign2($method, $url, $params, $secretKey, bool $skipPort = false)
+    {
+        ksort($params, SORT_LOCALE_STRING);
+
+        $urlParsed = parse_url($url);
+        $path = $urlParsed['path'];
+        $host = isset($urlParsed['host']) ? $urlParsed['host'] : "";
+        if (isset($urlParsed['port']) && $urlParsed['port'] != 80) {
+            if (!$skipPort) {
+                $host .= ":{$urlParsed['port']}";
+            }
+        }
+
+        $method = strtoupper($method) == 'POST' ? 'POST' : 'GET';
+
+        $data = implode("\n",
+            array(
+                $method,
+                $host,
+                $path,
+                $this->httpBuildQueryRfc3986($params)
+            )
+        );
+
+        $signature = base64_encode(
+            hash_hmac("sha256",
+                "{$data}",
+                "{$secretKey}",
+                TRUE
+            )
+        );
+
+        return $signature;
+    }
+
+    /**
+     * Add sign number two version
+     * @param $posted
+     * @param $key
+     * @return string
+     */
+    private function getSign1($posted, $key): string
+    {
+        return rawurlencode(md5($posted['tid'] . $posted['name'] . $posted['comment'] . $posted['partner_id'] .
+            $posted['service_id'] . $posted['order_id'] . $posted['type'] . $posted['cost'] . $posted['income_total'] .
+            $posted['income'] . $posted['partner_income'] . $posted['system_income'] . $posted['command'] .
+            $posted['phone_number'] . $posted['email'] . $posted['resultStr'] .
+            $posted['date_created'] . $posted['version'] . $key));
     }
 
     /**
@@ -322,5 +477,98 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
             '#value' => $this->t('Submit order'),
         ];
         return $form;
+    }
+
+
+    /**
+     * Get VAT options
+     * @return string[]
+     */
+    public static function getVatOptions(): array
+    {
+        return [
+            'none' => 'НДС не облагается',
+            'vat10' => '10%, включая',
+            'vat110' => '10%, поверх',
+            'vat18' => '18%, включая',
+            'vat118' => '18%, поверх',
+            'vat20' => '20%, включая',
+            'vat120' => '20%, поверх',
+        ];
+    }
+
+    /**
+     * Get API version options
+     * @return string[]
+     */
+    private static function getApiVersionOptions(): array
+    {
+        return [
+            '1.0' => '1.0',
+            '2.0' => '2.0',
+        ];
+    }
+
+    /**
+     * Get unit options
+     * @return string[]
+     */
+    private function getUnitOptions(): array
+    {
+        return [
+            'piece' => 'штука',
+            'service' => 'услуга',
+            'package' => 'комплект',
+            'g' => 'грамм',
+            'kg' => 'килограмм',
+            't' => 'тонна',
+            'ml' => 'миллилитр',
+            'm3' => 'кубометр',
+            'hr' => 'час',
+            'm' => 'метр',
+            'km' => 'километр',
+        ];
+    }
+
+    /**
+     * Get payment method options
+     * @return string []
+     * @since
+     */
+    public static function getPaymentMethodOptions(): array
+    {
+        return [
+            'full_prepayment' => 'Предоплата 100%',
+            'prepayment' => 'Предоплата',
+            'advance' => 'Аванс',
+            'full_payment' => 'Полный расчёт',
+            'partial_payment' => 'Частичный расчёт',
+            'credit' => 'Передача в кредит',
+            'credit_payment' => 'Оплата кредита',
+        ];
+    }
+
+    /**
+     * Get payment object options
+     * @return string[]
+     * @since
+     */
+    public static function getPaymentObjectOptions(): array
+    {
+        return [
+            'commodity' => 'Товар (Значение по умолчанию. Передается, в том числе, при отсутствии параметра)',
+            'excise' => 'Подакциозный товар',
+            'job' => 'Работа',
+            'service' => 'Услуга',
+            'gambling_bet' => 'Ставка азартной игры',
+            'gambling_prize' => 'Выигрыш азартной игры',
+            'lottery' => 'Лотерейный билет',
+            'lottery_prize' => 'Выигрыш лотереи',
+            'intellectual_activity' => 'Предоставление результатов интеллектуальной деятельности',
+            'payment' => 'Платёж',
+            'agent_commission' => 'Агентское вознаграждение',
+            'composite' => 'Составной предмет расчёта',
+            'another' => 'Другое',
+        ];
     }
 }
