@@ -27,14 +27,6 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
      * @var string payment url
      */
     protected $url = 'https://partner.life-pay.ru/alba/input/';
-    /**
-     * @var string
-     */
-    public static $signature_separator = '|';
-    /**
-     * @var string
-     */
-    public static $order_separator = '#';
 
     /**
      * Display label for payment method
@@ -51,7 +43,7 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
         $build['image'] = [
             '#theme' => 'image',
             '#uri' => drupal_get_path('module', 'uc_lifepay') . '/images/logo.png',
-            '#alt' => $this->t('lifepay'),
+            '#alt' => $this->t('Lifepay'),
             '#attributes' => ['class' => ['uc-lifepay-logo']]
         ];
 

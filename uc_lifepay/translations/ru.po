@@ -161,7 +161,7 @@ msgstr "Обзор"
 
 #: uc_lifepay.module:48
 msgid "Add currency"
-msgstr "Добавить валюду"
+msgstr "Добавить валюту"
 
 #: uc_lifepay.module:56
 msgid "Edit currency"

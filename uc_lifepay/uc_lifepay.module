@@ -14,11 +14,11 @@ function uc_lifepay_help($route_name, RouteMatchInterface $route_match) {
 	// Provide information and instructions on the payment method add and edit forms.
 	if ($route_name == 'entity.uc_payment_method.add_form' &&
 	    $route_match->getRawParameter('plugin_id') == 'lifepay') {
-		return '<p>' . t('To accept payments in lifepay, please ensure that demo mode is disabled and your store currency is one of RUB UAH USD, AUD, CAD, EUR or GBP.') . '</p>';
+		return '<p>' . t('To accept payments in Lifepay, please ensure that demo mode is disabled and your store currency is one of RUB UAH USD, AUD, CAD, EUR or GBP.') . '</p>';
 	}
 	elseif ($route_name == 'entity.uc_payment_method.edit_form' &&
 	        $route_match->getParameter('uc_payment_method')->getPlugin()->getPluginId() == 'lifepay') {
-		return '<p>' . t('To accept payments in lifepay, please ensure that demo mode is disabled and your store currency is one of RUB UAH USD, AUD, CAD, EUR or GBP.') . '</p>';
+		return '<p>' . t('To accept payments in Lifepay, please ensure that demo mode is disabled and your store currency is one of RUB UAH USD, AUD, CAD, EUR or GBP.') . '</p>';
 	}
 }
 

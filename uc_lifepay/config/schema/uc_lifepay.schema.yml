@@ -1,7 +1,7 @@
 # Schema for the configuration files of the uc_lifepay module.
 payment_method.settings.lifepay:
   type: mapping
-  label: 'lifepay form configuration settings'
+  label: 'Lifepay form configuration settings'
   mapping:
     service_id:
       type: string
