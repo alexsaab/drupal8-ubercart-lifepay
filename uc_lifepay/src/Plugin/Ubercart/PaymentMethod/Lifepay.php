@@ -158,7 +158,7 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
             '#type' => 'select',
             '#title' => $this->t("Object for products"),
             '#description' => $this->t("Select units for products"),
-            '#options' => self::getVatOptions(),
+            '#options' => self::getUnitOptions(),
             '#default_value' => $this->configuration['unit_products'],
             '#required' => true,
         ];
@@ -167,7 +167,7 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
             '#type' => 'select',
             '#title' => $this->t("Units for delivery"),
             '#description' => $this->t("Select units for delivery"),
-            '#options' => self::getVatOptions(),
+            '#options' => self::getUnitOptions(),
             '#default_value' => $this->configuration['unit_delivery'],
             '#required' => true,
         ];
