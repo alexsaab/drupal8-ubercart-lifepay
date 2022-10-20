@@ -60,10 +60,7 @@ class LifepayController extends ControllerBase
      */
     public function notification(Request $request)
     {
-        $posted = \Drupal::request()->request->get();
-        if (empty($posted)) {
-            $posted = \Drupal::request()->query->get();
-        }
+        $posted = $_POST;
         // Try to get values from request
         $orderId = $posted['order_id'];
         // Get first if

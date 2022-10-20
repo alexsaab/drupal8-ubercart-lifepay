@@ -42,7 +42,7 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
         ];
         $build['image'] = [
             '#theme' => 'image',
-            '#uri' => drupal_get_path('module', 'uc_lifepay') . '/images/logo.png',
+            '#uri' => drupal_get_path('module', 'uc_lifepay').'/images/logo.png',
             '#alt' => $this->t('Lifepay'),
             '#attributes' => ['class' => ['uc-lifepay-logo']]
         ];
@@ -266,7 +266,7 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
             'key' => $configs['key'],
             'cost' => $totalPriceNumber,
             'order_id' => $orderId,
-            'name' =>  $configs['shop_hostname'] . $orderId,
+            'name' => $configs['shop_hostname'].$orderId,
             'invoice_data' => json_encode($items),
         );
 
@@ -298,8 +298,8 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
         // Products lines
         foreach ($order->products as $product) {
 
-            $price = (float)uc_currency_format($product->price->value, false, false, '.');
-            $qty = (int)  $product->qty->value;
+            $price = (float) uc_currency_format($product->price->value, false, false, '.');
+            $qty = (int) $product->qty->value;
             $total = $price * $qty;
             $itemsArray[] = [
                 'code' => $product->model->value,
@@ -321,12 +321,12 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
                 $itemsArray[] = [
                     'code' => 'shipping',
                     'name' => $item['title'],
-                    'price' => $price,
+                    'price' => (float) $price,
                     'unit' => $config['unit_delivery'],
                     'payment_object' => $config['object_delivery'],
                     'payment_method' => $config['payment_method'],
                     'quantity' => 1,
-                    'sum' => $price,
+                    'sum' => (float) $price,
                     'vat_mode' => $config['vat_delivery'],
                 ];
             }
@@ -344,10 +344,10 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
     private function httpBuildQueryRfc3986($queryData, string $argSeparator = '&'): string
     {
         $r = '';
-        $queryData = (array)$queryData;
+        $queryData = (array) $queryData;
         if (!empty($queryData)) {
             foreach ($queryData as $k => $queryVar) {
-                $r .= $argSeparator . $k . '=' . rawurlencode($queryVar);
+                $r .= $argSeparator.$k.'='.rawurlencode($queryVar);
             }
         }
         return trim($r, $argSeparator);
@@ -390,7 +390,7 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
             hash_hmac("sha256",
                 "{$data}",
                 "{$secretKey}",
-                TRUE
+                true
             )
         );
 
@@ -417,7 +417,7 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
             } else {
                 $i = 0;
                 foreach ($v as $val) {
-                    $form[$k . '[' . $i++ . ']'] = [
+                    $form[$k.'['.$i++.']'] = [
                         '#type' => 'hidden',
                         '#value' => $val
                     ];
