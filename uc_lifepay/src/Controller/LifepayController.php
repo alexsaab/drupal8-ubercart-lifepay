@@ -85,13 +85,14 @@ class LifepayController extends ControllerBase
 
         if ($order->getStateId() != $this->configuration['order_status_after_pay']) {
             if ($this->checkIpnRequestIsValid($posted)) {
-                $comment = $this->t('Paid by Lifepay method use payment type "@type", order #@order and transaction number in Lifepay system is @transaction. Also look payment callback log: @dump ', [
-                    '@type' => Html::escape($posted['service_id']),
-                    '@order' => Html::escape($posted['order_id']),
-                    '@transaction' => Html::escape($posted['tid']),
-                    '@dump' => Html::escape(print_r($posted, true)),
-                ]);
-                uc_payment_enter($order->id(), 'lifepay', $orderTotal, $order->getOwnerId(), NULL, $comment);
+                $comment = $this->t('Paid by Lifepay method use payment type "@type", order #@order and transaction number in Lifepay system is @transaction. Also look payment callback log: @dump ',
+                    [
+                        '@type' => Html::escape($posted['service_id']),
+                        '@order' => Html::escape($posted['order_id']),
+                        '@transaction' => Html::escape($posted['tid']),
+                        '@dump' => Html::escape(print_r($posted, true)),
+                    ]);
+                uc_payment_enter($order->id(), 'lifepay', $orderTotal, $order->getOwnerId(), null, $comment);
                 $order->setStatusId($this->configuration['order_status_after_pay'])->save();
                 die('success');
             } else {
@@ -105,20 +106,30 @@ class LifepayController extends ControllerBase
     }
 
     /**
+     * Callback order success proceed
+     * @param OrderInterface $order
+     * @param Request $request
+     */
+    public function onReturn(Order $order, Request $request)
+    {
+        \Drupal::messenger()->addMessage($this->t('Order complete! Thank you for payment'), 'success');
+        return $this->cartManager->completeSale($order);
+    }
+
+    /**
      * Callback order fail proceed
      * @param OrderInterface $order
      * @param Request $request
      */
     public function onCancel(Order $order, Request $request)
     {
-        $posted = \Drupal::request()->request->get();
-        if (empty($posted)) {
-            $posted = \Drupal::request()->query->get();
-        }
-        \Drupal::messenger()->addMessage($this->t('You have canceled checkout at Lifepay but may resume the checkout process here when you are ready.'), 'error');
-        uc_order_comment_save($order->id(), 0, $this->t('Order have not passed Lifepay declined. Lifepay make call back with data: @dump', [
-            '@dump' => Html::escape(print_r($posted, true))
-        ]));
+        $posted = $_REQUEST;
+        \Drupal::messenger()->addMessage($this->t('You have canceled checkout at Lifepay but may resume the checkout process here when you are ready.'),
+            'error');
+        uc_order_comment_save($order->id(), 0,
+            $this->t('Order have not passed Lifepay declined. Lifepay make call back with data: @dump', [
+                '@dump' => Html::escape(print_r($posted, true))
+            ]));
 
         $url = '/cart/checkout/';
         $response = new RedirectResponse($url, 302);
@@ -132,7 +143,7 @@ class LifepayController extends ControllerBase
      */
     private function checkIpnRequestIsValid($posted): bool
     {
-        $url = \Drupal::request()->getHost() . $_SERVER['REQUEST_URI'];
+        $url = \Drupal::request()->getHost().$_SERVER['REQUEST_URI'];
         $check = $posted['check'];
         unset($posted['check']);
 
@@ -158,10 +169,10 @@ class LifepayController extends ControllerBase
     private function httpBuildQueryRfc3986($queryData, string $argSeparator = '&'): string
     {
         $r = '';
-        $queryData = (array)$queryData;
+        $queryData = (array) $queryData;
         if (!empty($queryData)) {
             foreach ($queryData as $k => $queryVar) {
-                $r .= $argSeparator . $k . '=' . rawurlencode($queryVar);
+                $r .= $argSeparator.$k.'='.rawurlencode($queryVar);
             }
         }
         return trim($r, $argSeparator);
@@ -204,7 +215,7 @@ class LifepayController extends ControllerBase
             hash_hmac("sha256",
                 "{$data}",
                 "{$secretKey}",
-                TRUE
+                true
             )
         );
 
@@ -219,11 +230,11 @@ class LifepayController extends ControllerBase
      */
     private function getSign1($posted, $key): string
     {
-        return rawurlencode(md5($posted['tid'] . $posted['name'] . $posted['comment'] . $posted['partner_id'] .
-            $posted['service_id'] . $posted['order_id'] . $posted['type'] . $posted['cost'] . $posted['income_total'] .
-            $posted['income'] . $posted['partner_income'] . $posted['system_income'] . $posted['command'] .
-            $posted['phone_number'] . $posted['email'] . $posted['resultStr'] .
-            $posted['date_created'] . $posted['version'] . $key));
+        return rawurlencode(md5($posted['tid'].$posted['name'].$posted['comment'].$posted['partner_id'].
+            $posted['service_id'].$posted['order_id'].$posted['type'].$posted['cost'].$posted['income_total'].
+            $posted['income'].$posted['partner_income'].$posted['system_income'].$posted['command'].
+            $posted['phone_number'].$posted['email'].$posted['resultStr'].
+            $posted['date_created'].$posted['version'].$key));
     }
 
 }

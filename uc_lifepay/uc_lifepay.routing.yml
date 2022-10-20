@@ -5,3 +5,19 @@ uc_lifepay.notification:
     _title: 'Notification callback'
   requirements:
     _permission: 'access content'
+
+uc_lifepay.return:
+  path: '/cart/lifepay/return'
+  defaults:
+    _controller: '\Drupal\uc_lifepay\Controller\LifepayController::onReturn'
+    _title: 'Successfully callback'
+  requirements:
+    _permission: 'access content'
+
+uc_lifepay.cancel:
+  path: '/cart/lifepay/cancel'
+  defaults:
+    _controller: '\Drupal\uc_lifepay\Controller\LifepayController::onCancel'
+    _title: 'Fail callback'
+  requirements:
+    _permission: 'access content'
