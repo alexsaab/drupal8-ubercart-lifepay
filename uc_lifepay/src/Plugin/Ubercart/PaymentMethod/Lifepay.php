@@ -278,7 +278,7 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
             unset($data['key']);
             $data['version'] = $configs['api_version'];
             $data['service_id'] = $configs['service_id'];
-            $current_uri = \Drupal::request()->getSchemeAndHttpHost().\Drupal::request()->getRequestUri();
+//            $current_uri = \Drupal::request()->getSchemeAndHttpHost().\Drupal::request()->getRequestUri();
             $data['check'] = $this->getSign2('POST', $this->url, $data, $configs['skey']);
         }
 
