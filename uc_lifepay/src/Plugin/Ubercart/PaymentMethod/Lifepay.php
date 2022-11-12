@@ -278,8 +278,40 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
             unset($data['key']);
             $data['version'] = $configs['api_version'];
             $data['service_id'] = $configs['service_id'];
-            $data['check'] = $this->getSign2('POST', $this->liveurl, $data, $configs['skey']);
+            $current_uri = \Drupal::request()->getSchemeAndHttpHost().\Drupal::request()->getRequestUri();
+            $data['check'] = $this->getSign2('POST', $this->url, $data, $configs['skey']);
         }
+
+//       print <<<EOL
+//        <!doctype html>
+//<html lang="en">
+//<head>
+//  <meta charset="utf-8">
+//  <meta name="viewport" content="width=device-width, initial-scale=1">
+//  <title>Payment form Lifepay payment system</title>
+//  <meta name="description" content="Payment form lifepay">
+//  <meta name="author" content="SitePoint">
+//</head>
+//<body>
+//EOL;
+//        print "<form action='{$this->payment_url}' method='post' id='lifepay-payment-form'>";
+//        foreach ($data as $key => $value) {
+//            print "<input type='hidden' value='{$value}' name='$key'>";
+//        }
+//        print <<<EOL
+//<div class="buttons">
+//    <div class="pull-right">
+//      <input type="submit" style="visibility:hidden;" value="Paynow"/>
+//    </div>
+//  </div>
+//</form>
+//<script type="text/javascript">
+//    let paymentForm = document.getElementById('lifepay-payment-form')
+//    paymentForm.submit()
+//</script>
+//</body>
+//</html>
+//EOL;
 
         return $this->generateForm($data, $this->url);
     }
