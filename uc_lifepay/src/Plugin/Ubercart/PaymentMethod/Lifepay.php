@@ -96,15 +96,15 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
 
         $form['key'] = [
             '#type' => 'textfield',
-            '#title' => $this->t("Service key"),
-            '#description' => $this->t("Input service key here"),
+            '#title' => $this->t("Open key"),
+            '#description' => $this->t("Input open key here"),
             '#default_value' => $this->configuration['key'],
             '#required' => true,
         ];
 
         $form['skey'] = [
             '#type' => 'textfield',
-            '#title' => $this->t("Service key"),
+            '#title' => $this->t("Secret key"),
             '#description' => $this->t("Input secret key here"),
             '#default_value' => $this->configuration['skey'],
             '#required' => true,
@@ -278,42 +278,46 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
             unset($data['key']);
             $data['version'] = $configs['api_version'];
             $data['service_id'] = $configs['service_id'];
-//            $current_uri = \Drupal::request()->getSchemeAndHttpHost().\Drupal::request()->getRequestUri();
             $data['check'] = $this->getSign2('POST', $this->url, $data, $configs['skey']);
         }
 
-//       print <<<EOL
-//        <!doctype html>
-//<html lang="en">
-//<head>
-//  <meta charset="utf-8">
-//  <meta name="viewport" content="width=device-width, initial-scale=1">
-//  <title>Payment form Lifepay payment system</title>
-//  <meta name="description" content="Payment form lifepay">
-//  <meta name="author" content="SitePoint">
-//</head>
-//<body>
-//EOL;
-//        print "<form action='{$this->payment_url}' method='post' id='lifepay-payment-form'>";
-//        foreach ($data as $key => $value) {
-//            print "<input type='hidden' value='{$value}' name='$key'>";
-//        }
-//        print <<<EOL
-//<div class="buttons">
-//    <div class="pull-right">
-//      <input type="submit" style="visibility:hidden;" value="Paynow"/>
-//    </div>
-//  </div>
-//</form>
-//<script type="text/javascript">
-//    let paymentForm = document.getElementById('lifepay-payment-form')
-//    paymentForm.submit()
-//</script>
-//</body>
-//</html>
-//EOL;
+        flush;
+        ob_clean;
 
-        return $this->generateForm($data, $this->url);
+        // Сделано так из-за того, что Drupal генерирует кучу мусорных данных в формах
+
+       print <<<EOL
+        <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment form Lifepay payment system</title>
+  <meta name="description" content="Payment form lifepay">
+  <meta name="author" content="SitePoint">
+</head>
+<body>
+EOL;
+        print "<form action='{$this->url}' method='post' id='lifepay-payment-form'>";
+        foreach ($data as $key => $value) {
+            print "<input type='hidden' value='{$value}' name='$key'>";
+        }
+        print <<<EOL
+<div class="buttons">
+    <div class="pull-right">
+      <input type="submit" style="visibility:hidden;" value="Paynow"/>
+    </div>
+  </div>
+</form>
+<script type="text/javascript">
+    let paymentForm = document.getElementById('lifepay-payment-form')
+    paymentForm.submit()
+</script>
+</body>
+</html>
+EOL;
+        die;
+
     }
 
 
