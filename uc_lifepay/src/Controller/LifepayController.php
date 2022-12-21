@@ -107,8 +107,14 @@ class LifepayController extends ControllerBase
      * @param OrderInterface $order
      * @param Request $request
      */
-    public function onReturn(Order $order, Request $request)
+    public function onReturn(Request $request)
     {
+        $posted = $_REQUEST;
+
+        // Try to get values from request
+        $orderId = $posted['order_id'];
+        $order = Order::load($orderId);
+
         \Drupal::messenger()->addMessage($this->t('Order complete! Thank you for payment'), 'success');
         return $this->cartManager->completeSale($order);
     }
@@ -118,9 +124,13 @@ class LifepayController extends ControllerBase
      * @param OrderInterface $order
      * @param Request $request
      */
-    public function onCancel(Order $order, Request $request)
+    public function onCancel(Request $request)
     {
         $posted = $_REQUEST;
+        // Try to get values from request
+        $orderId = $posted['order_id'];
+        $order = Order::load($orderId);
+
         \Drupal::messenger()->addMessage($this->t('You have canceled checkout at Lifepay but may resume the checkout process here when you are ready.'),
             'error');
         uc_order_comment_save($order->id(), 0,
