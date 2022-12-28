@@ -61,6 +61,7 @@ class LifepayController extends ControllerBase
     public function notification(Request $request)
     {
         $posted = $_POST;
+
         // Try to get values from request
         $orderId = $posted['order_id'];
         // Get first if
@@ -244,4 +245,21 @@ class LifepayController extends ControllerBase
             $posted['date_created'].$posted['version'].$key));
     }
 
+    /**
+     * Logger function
+     * @param  [type] $var  [description]
+     * @param  string  $text  [description]
+     * @return [type]       [description]
+     */
+    public function logger($var, $text = '')
+    {
+        $loggerFile = __DIR__.'/logger.log';
+        if (is_object($var) || is_array($var)) {
+            $var = (string) print_r($var, true);
+        } else {
+            $var = (string) $var;
+        }
+        $string = date("Y-m-d H:i:s")." - ".$text.' - '.$var."\n";
+        file_put_contents($loggerFile, $string, FILE_APPEND);
+    }
 }
