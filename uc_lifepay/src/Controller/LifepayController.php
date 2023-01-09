@@ -60,7 +60,9 @@ class LifepayController extends ControllerBase
      */
     public function notification(Request $request)
     {
-        $posted = $_POST;
+        $posted = \Drupal::request()->request->all();
+
+//        $this->logger($posted, 'posted');
 
         // Try to get values from request
         $orderId = $posted['order_id'];
@@ -155,11 +157,21 @@ class LifepayController extends ControllerBase
         $check = $posted['check'];
         unset($posted['check']);
 
+//        $this->logger($url, 'url');
+//        $this->logger($check, 'check');
+//        $this->logger($this->configuration['api_version'], '$this->configuration[api_version]');
+//        $this->logger($this->configuration['skey'], '$this->configuration[skey]');
+
+
+        $signature = null;
+
         if ($this->configuration['api_version'] === '2.0') {
             $signature = $this->getSign2("POST", $url, $posted, $this->configuration['skey']);
         } elseif ($this->configuration['api_version'] === '1.0') {
             $signature = $this->getSign1($posted, $this->configuration['skey']);
         }
+
+//        $this->logger($signature, '$signature');
 
         if ($signature === $check) {
             return true;
