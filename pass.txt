@@ -1,0 +1,66 @@
+Поставлен на сервер:
+
+Сервер https://uc.longboom.ru
+Авторизация: https://uc.longboom.ru/en/user/login
+Пользователь: admin
+Пароль: MyTcr4GRI3Ylt3ri
+
+Ошибка в админке:
+https://uc.longboom.ru/en/admin/config
+
+Правим баг который не дает развернуть полностью Ubercart:
+
+https://www.drupal.org/project/ubercart/issues/2841196
+
+Выполняем SQL запрос:
+
+delete from menu_tree where route_name = 'entity.uc_country.collection';
+
+Потом накатываем патч
+
+diff --git a/uc_store/uc_store.links.task.yml b/uc_store/uc_store.links.task.yml
+index a5faefb..cb3f700 100644
+--- a/uc_store/uc_store.links.task.yml
++++ b/uc_store/uc_store.links.task.yml
+@@ -1,5 +1,5 @@
+-entity.uc_country.collection:
+-  route_name: entity.uc_country.collection
++uc_store.uc_country.collection:
++  route_name: uc_store.uc_country.collection
+   title: 'Countries'
+   base_route: entity.uc_country.collection
+ uc_store.address_fields:
+
+Патч не отработал, так как остались данные в кеше.
+Установил утилиту drush. Запустил ее она не отработала, вылетает с другой ошибкой:
+
+PHP Fatal error:  Declaration of Drupal\uc_attribute\Form\ProductClassAttributesForm::buildForm(array $form, Drupal\Core\Form\FormStateInterface $form_state, ?Drupal\node\NodeTypeInterface $node_type = NULL) must be compatible with Drupal\uc_attribute\Form\ObjectAttributesFormBase::buildForm(array $form, Drupal\Core\Form\FormStateInterface $form_state, $attributes = NULL) in /var/www/uc.longboom.ru/htdocs/web/modules/contrib/ubercart/uc_attribute/src/Form/ProductClassAttributesForm.php on line 16
+ [warning] Drush command terminated abnormally.
+
+Пришлось чистить кеш вручную:
+
+Вычищая все данные из таблиц:
+cache_bootstrap
+cache_config
+cache_container
+cache_data
+cache_default
+cache_discovery
+cache_dynamic_page_cache
+cache_entity
+cache_menu
+cache_page
+cache_render
+cachetags
+
+В общем никакие рецепты из https://www.drupal.org/project/ubercart/issues/2841196 не помогли.
+Собственно альфаверсию не возможно поставить на 8 Drupal. Ошибка неустранима:
+
+FastCGI sent in stderr: "PHP message: Uncaught PHP Exception Symfony\Component\Routing\Exception\RouteNotFoundException: "Route "entity.uc_country.collection" does not exist." at /var/www/uc.longboom.ru/htdocs/web/core/
+lib/Drupal/Core/Routing/RouteProvider.php line 208" while reading response header from upstream, client: 95.165.172.22, server: uc.longboom.ru, request: "GET /en/admin/config HTTP/1.1", upstream: "fastcgi://unix:/run/php/php7.4-fpm.sock:", host: "uc.longboom.ru", refe
+rrer: "https://uc.longboom.ru/en/admin/modules"
+
+В общем потратил я 7 часов. По нормальному так ничего и не завелось. Такой статус. Ubercart в альфаверсии.
+До этого данной проблемы не возникало видимо что-то поменяли опять в Ubercart / Drupal .
+Поэтому ничего более как предложить разместить так - порекомендовать не могу. Модуль был с багами но без критических ошибок - маловероятно, что он без проблем запустится в конфигурации у клиента.
+Ну Drupalеры к таким тонкостям привыкли.

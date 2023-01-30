@@ -62,8 +62,6 @@ class LifepayController extends ControllerBase
     {
         $posted = \Drupal::request()->request->all();
 
-//        $this->logger($posted, 'posted');
-
         // Try to get values from request
         $orderId = $posted['order_id'];
         // Get first if
@@ -156,12 +154,6 @@ class LifepayController extends ControllerBase
         $url = \Drupal::request()->getHost().$_SERVER['REQUEST_URI'];
         $check = $posted['check'];
         unset($posted['check']);
-
-//        $this->logger($url, 'url');
-//        $this->logger($check, 'check');
-//        $this->logger($this->configuration['api_version'], '$this->configuration[api_version]');
-//        $this->logger($this->configuration['skey'], '$this->configuration[skey]');
-
 
         $signature = null;
 
