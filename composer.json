@@ -1,0 +1,11 @@
+{
+    "name": "alexsaab/drupal8-ubercart-lifepay",
+    "description": "Payment Gateway for Drupal 8 Ubercart 4 and Lifepay payment system",
+    "authors": [
+        {
+            "name": "Alexey",
+            "email": "awa77@mail.ru"
+        }
+    ],
+    "require": {}
+}
