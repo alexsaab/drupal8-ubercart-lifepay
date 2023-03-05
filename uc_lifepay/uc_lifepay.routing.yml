@@ -9,15 +9,15 @@ uc_lifepay.notification:
 uc_lifepay.return:
   path: '/cart/lifepay/return'
   defaults:
-    _controller: '\Drupal\uc_lifepay\Controller\LifepayController::onReturn'
+    _controller: '\Drupal\uc_lifepay\Controller\LifepayController::onReturnBack'
     _title: 'Successfully callback'
   requirements:
-    _permission: 'access content'
+    _access: 'TRUE'
 
 uc_lifepay.cancel:
   path: '/cart/lifepay/cancel'
   defaults:
-    _controller: '\Drupal\uc_lifepay\Controller\LifepayController::onCancel'
+    _controller: '\Drupal\uc_lifepay\Controller\LifepayController::onCancelBack'
     _title: 'Fail callback'
   requirements:
-    _permission: 'access content'
+    _access: 'TRUE'

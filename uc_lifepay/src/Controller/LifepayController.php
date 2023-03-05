@@ -108,7 +108,7 @@ class LifepayController extends ControllerBase
      * @param OrderInterface $order
      * @param Request $request
      */
-    public function onReturn(Request $request)
+    public function onReturnBack(Request $request)
     {
         $posted = $_REQUEST;
 
@@ -125,7 +125,7 @@ class LifepayController extends ControllerBase
      * @param OrderInterface $order
      * @param Request $request
      */
-    public function onCancel(Request $request)
+    public function onCancelBack(Request $request)
     {
         $posted = $_REQUEST;
         // Try to get values from request
