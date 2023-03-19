@@ -12,6 +12,9 @@ payment_method.settings.lifepay:
     skey:
       type: string
       label: 'Secret key'
+    schema_version:
+      type: string
+      label: 'Select http or https protocol version'
     shop_hostname:
       type: string
       label: 'Order description with host name'

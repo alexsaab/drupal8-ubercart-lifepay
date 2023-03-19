@@ -7,7 +7,6 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\uc_cart\CartManagerInterface;
 use Drupal\uc_order\Entity\Order;
-use Drupal\uc_payment\Plugin\PaymentMethodManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -30,7 +29,7 @@ class LifepayController extends ControllerBase
     /**
      * Constructs a LifepayController.
      *
-     * @param \Drupal\uc_cart\CartManagerInterface $cart_manager
+     * @param  \Drupal\uc_cart\CartManagerInterface  $cart_manager
      *   The cart manager.
      */
     public function __construct(CartManagerInterface $cart_manager)
@@ -42,7 +41,7 @@ class LifepayController extends ControllerBase
     /**
      * Create method
      *
-     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+     * @param  \Symfony\Component\DependencyInjection\ContainerInterface  $container
      * @return \Drupal\uc_lifepay\Controller\LifepayController
      */
     public static function create(ContainerInterface $container)
@@ -56,7 +55,7 @@ class LifepayController extends ControllerBase
     /**
      * Notification callback function
      *
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param  \Symfony\Component\HttpFoundation\Request  $request
      */
     public function notification(Request $request)
     {
@@ -94,7 +93,7 @@ class LifepayController extends ControllerBase
                 $order->setStatusId($this->configuration['order_status_after_pay'])->save();
                 die('success');
             } else {
-                $this->onCancel($order, $request);
+                $this->onCancelBack($request);
                 return;
             }
         } else {
@@ -105,8 +104,8 @@ class LifepayController extends ControllerBase
 
     /**
      * Callback order success proceed
-     * @param OrderInterface $order
-     * @param Request $request
+     * @param  OrderInterface  $order
+     * @param  Request  $request
      */
     public function onReturnBack(Request $request)
     {
@@ -122,8 +121,8 @@ class LifepayController extends ControllerBase
 
     /**
      * Callback order fail proceed
-     * @param OrderInterface $order
-     * @param Request $request
+     * @param  OrderInterface  $order
+     * @param  Request  $request
      */
     public function onCancelBack(Request $request)
     {
@@ -151,7 +150,10 @@ class LifepayController extends ControllerBase
      */
     private function checkIpnRequestIsValid($posted): bool
     {
-        $url = \Drupal::request()->getHost().$_SERVER['REQUEST_URI'];
+        $schema = $this->configuration['schema_version'] ?? 'https://';
+
+        $url = $schema.\Drupal::request()->getHost().$_SERVER['REQUEST_URI'];
+
         $check = $posted['check'];
         unset($posted['check']);
 
@@ -163,8 +165,6 @@ class LifepayController extends ControllerBase
             $signature = $this->getSign1($posted, $this->configuration['skey']);
         }
 
-//        $this->logger($signature, '$signature');
-
         if ($signature === $check) {
             return true;
         } else {
@@ -175,7 +175,7 @@ class LifepayController extends ControllerBase
     /**
      * Part of sign generator
      * @param $queryData
-     * @param string $argSeparator
+     * @param  string  $argSeparator
      * @return string
      */
     private function httpBuildQueryRfc3986($queryData, string $argSeparator = '&'): string
@@ -196,7 +196,7 @@ class LifepayController extends ControllerBase
      * @param $url
      * @param $params
      * @param $secretKey
-     * @param false $skipPort
+     * @param  false  $skipPort
      * @return string
      */
     private function getSign2($method, $url, $params, $secretKey, bool $skipPort = false)
@@ -206,7 +206,7 @@ class LifepayController extends ControllerBase
         $urlParsed = parse_url($url);
         $path = $urlParsed['path'];
         $host = isset($urlParsed['host']) ? $urlParsed['host'] : "";
-        if (isset($urlParsed['port']) && $urlParsed['port'] != 80) {
+        if (isset($urlParsed['port']) && ($urlParsed['port'] != 80 || $urlParsed['port'] != 443)) {
             if (!$skipPort) {
                 $host .= ":{$urlParsed['port']}";
             }

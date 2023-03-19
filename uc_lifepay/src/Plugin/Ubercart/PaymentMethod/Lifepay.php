@@ -119,6 +119,15 @@ class Lifepay extends PaymentMethodPluginBase implements OffsitePaymentMethodPlu
             '#required' => false,
         ];
 
+        $form['schema_version'] = [
+            '#type' => 'select',
+            '#title' => $this->t("Schema version"),
+            '#description' => $this->t("Select http or https protocol version"),
+            '#options' => self::getSchemaVersionOptions(),
+            '#default_value' => $this->configuration['schema_version'],
+            '#required' => true,
+        ];
+
         $form['api_version'] = [
             '#type' => 'select',
             '#title' => $this->t("API version"),
@@ -498,6 +507,21 @@ EOL;
             '2.0' => '2.0',
         ];
     }
+
+
+    /**
+     * Get API version options
+     * @return string[]
+     */
+    private static function getSchemaVersionOptions(): array
+    {
+        return [
+            'http://' => 'http://',
+            'https://' => 'https://',
+        ];
+    }
+
+
 
     /**
      * Get unit options
